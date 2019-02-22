@@ -1,7 +1,13 @@
 from collections import defaultdict, namedtuple
 import numbers
 import re
-from urlparse import parse_qsl, urlsplit
+
+import sys
+
+if sys.version_info < (3, 0):
+    from urlparse import parse_qsl, urlsplit
+else:
+    from urllib.parse import parse_qsl, urlsplit
 
 from flex.core import validate
 import flex.exceptions
