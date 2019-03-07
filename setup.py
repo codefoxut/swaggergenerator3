@@ -7,7 +7,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-packages = ['swaggergenerator']
+packages = ['swaggergenerator3']
 requires = [
     'flex >= 5.4.1',  # https://github.com/pipermerriam/flex/pull/111
     'pyyaml',
@@ -20,7 +20,7 @@ with open('README.rst') as f:
 # the version is kept in a seperate file and gets parsed - this
 # way, setup.py doesn't have to import the package.
 
-VERSIONFILE = 'swaggergenerator/_version.py'
+VERSIONFILE = 'swaggergenerator3/_version.py'
 
 version_line = open(VERSIONFILE).read()
 version_re = r"^__version__ = ['\"]([^'\"]*)['\"]"
@@ -39,7 +39,7 @@ setup(
     author_email='simon@venmo.com',
     url='https://github.com/venmo/swaggergenerator',
     packages=packages,
-    package_dir={'swaggergenerator': 'swaggergenerator'},
+    package_dir={'swaggergenerator3': 'swaggergenerator3'},
     include_package_data=True,
     install_requires=requires,
     license='MIT',
