@@ -17,8 +17,9 @@ with open('README.rst') as f:
     readme = f.read()
 
 # This hack is from http://stackoverflow.com/a/7071358/1231454;
-# the version is kept in a seperate file and gets parsed - this
+# the version is kept in a separate file and gets parsed - this
 # way, setup.py doesn't have to import the package.
+# source repo :: https://github.com/venmo/swaggergenerator
 
 VERSIONFILE = 'swaggergenerator3/_version.py'
 
@@ -37,7 +38,7 @@ setup(
     long_description=readme,
     author='Simon Weber',
     author_email='simon@venmo.com',
-    url='https://github.com/venmo/swaggergenerator',
+    url='https://github.com/goibibo/swaggergenerator3',
     packages=packages,
     package_dir={'swaggergenerator3': 'swaggergenerator3'},
     include_package_data=True,
@@ -49,6 +50,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.7',
     ),
 )

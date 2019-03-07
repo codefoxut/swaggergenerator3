@@ -134,9 +134,9 @@ class Generator(object):
 
         valid_examples = self._merge_examples(self.path_to_examples)
 
-        schemas = {path: self._generate_path(path, exs) for (path, exs) in valid_examples.iteritems()}
+        schemas = {path: self._generate_path(path, exs) for (path, exs) in valid_examples.items()}
 
-        for path, schema in schemas.iteritems():
+        for path, schema in schemas.items():
             for example in (ex for ex in valid_examples[path] if ex.response.status_code.startswith('2')):
                 verb = example.request.method.lower()
                 if example.response.status_code in schema[verb]['responses']:
@@ -156,7 +156,7 @@ class Generator(object):
         known = False
         example_components = self._get_components(example.response.path)
 
-        for known_path, verbs in self.existing_schema.get('paths', {}).iteritems():
+        for known_path, verbs in self.existing_schema.get('paths', {}).items():
             if ((paths.component_matches(example_components, self._get_components(known_path))
                  and example.request.method.lower() in verbs)):
                 known = True
@@ -180,11 +180,12 @@ class Generator(object):
         #   1) ('users', None)
         #   2) ('users', 'test_an_error')
         # On the second pass, we find that the 2) is a match for 1), and merge those.
-        # 1) is _not_ a match for 2). If it was, we'd end up merging our more generic urls into more specific ones.
+        # 1) is _not_ a match for 2). If it was, we'd end up merging our more generic urls into
+        # more specific ones.
 
         # Detect naive params.
         component_examples = defaultdict(list)
-        for path, exs in path_to_examples.iteritems():
+        for path, exs in path_to_examples.items():
             components = self._get_components(path)
             component_examples[components].extend(exs)
 
@@ -204,7 +205,7 @@ class Generator(object):
                 component_examples[match].extend(my_examples)
 
         return {paths.build_paramaterized_path(components): exs
-                for (components, exs) in component_examples.iteritems()}
+                for (components, exs) in component_examples.items()}
 
     def _get_components(self, path):
         components = tuple(
@@ -290,35 +291,35 @@ class Generator(object):
         # see https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types.
 
         # OAS doesn't accept null values, but json-schema (and flex) accept the string "null".
-        type = 'null'
+        _type = 'null'
 
         if isinstance(x, dict):
-            type = 'object'
-        elif (x is True or x is False):
+            _type = 'object'
+        elif x is True or x is False:
             # tricky: booleans are subtypes of integers.
-            type = 'boolean'
+            _type = 'boolean'
         elif isinstance(x, numbers.Number):
-            type = 'number'
+            _type = 'number'
         elif isinstance(x, list):
-            type = 'array'
-        elif isinstance(x, basestring):
-            type = 'string'
+            _type = 'array'
+        elif isinstance(x, str):
+            _type = 'string'
 
-        return type
+        return _type
 
     def _generate_schema(self, body):
-        type = self._get_swagger_type(body)
+        _type = self._get_swagger_type(body)
 
         schema = {
-            'type': type,
+            'type': _type,
         }
 
-        if type == 'object':
+        if _type == 'object':
             schema['additionalProperties'] = False
             properties = {key: self._generate_schema(val)
-                          for key, val in body.iteritems()}
+                          for key, val in body.items()}
             schema['properties'] = properties
-        elif type == 'array':
+        elif _type == 'array':
             if len(body) == 0:
                 raise EmptyExampleArrayError
 
@@ -339,7 +340,7 @@ class Generator(object):
                 return schema
 
             # Try to match the current object against a definition.
-            for name, definition in self.existing_schema.get('definitions', {}).iteritems():
+            for name, definition in self.existing_schema.get('definitions', {}).items():
                 try:
                     validate(definition, body, context=self.existing_schema)
                 except flex.exceptions.ValidationError:
@@ -348,7 +349,7 @@ class Generator(object):
                     return {'$ref': "#/definitions/%s" % name}
 
             # No definition matched; recurse into subschemas.
-            for prop, prop_schema in schema['properties'].iteritems():
+            for prop, prop_schema in schema['properties'].items():
                 if prop in body:
                     schema['properties'][prop] = self._match_references(prop_schema, body[prop])
 

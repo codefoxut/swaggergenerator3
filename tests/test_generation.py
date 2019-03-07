@@ -1,6 +1,9 @@
 import requests
 
-from swaggergenerator import Generator, get_yaml
+from swaggergenerator3 import Generator, get_yaml
+
+import pytest
+import dictdiffer
 
 
 def test_no_params(httpbin):
@@ -11,7 +14,74 @@ def test_no_params(httpbin):
     response = requests.post(httpbin.url + '/post')
     generator.provide_example(response.request, response)
 
-    expected = {u'/post': {'post': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'files': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'origin': {'type': 'string'}, u'form': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'url': {'type': 'string'}, u'args': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'headers': {'additionalProperties': False, 'type': 'object', 'properties': {u'Content-Length': {'type': 'string'}, u'Accept-Encoding': {'type': 'string'}, u'Connection': {'type': 'string'}, u'Accept': {'type': 'string'}, u'User-Agent': {'type': 'string'}, u'Host': {'type': 'string'}}}, u'json': {'type': 'null'}, u'data': {'type': 'string'}}}}}, 'parameters': [], 'description': 'TODO'}}, u'/get': {'get': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'origin': {'type': 'string'}, u'headers': {'additionalProperties': False, 'type': 'object', 'properties': {u'Content-Length': {'type': 'string'}, u'Accept-Encoding': {'type': 'string'}, u'Connection': {'type': 'string'}, u'Accept': {'type': 'string'}, u'User-Agent': {'type': 'string'}, u'Host': {'type': 'string'}}}, u'args': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'url': {'type': 'string'}}}}}, 'parameters': [], 'description': 'TODO'}}}
+    expected = {
+        '/post': {
+            'post': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {
+                            'additionalProperties': False,
+                            'type': 'object',
+                            'properties': {
+                                'files': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'origin': {
+                                    'type': 'string'},
+                                'form': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'url': {
+                                    'type': 'string'},
+                                'args': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'headers': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {
+                                        'Content-Length': {'type': 'string'},
+                                        'Accept-Encoding': {'type': 'string'},
+                                        'Connection': {'type': 'string'},
+                                        'Accept': {'type': 'string'},
+                                        'User-Agent': {'type': 'string'},
+                                        'Host': {'type': 'string'}}
+                                },
+                                'json': {'type': 'null'},
+                                'data': {'type': 'string'}}
+                        }
+                    }
+                },
+                'parameters': [], 'description': 'TODO'}},
+        '/get': {
+            'get': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {
+                            'additionalProperties': False, 'type': 'object',
+                            'properties': {
+                                'origin': {'type': 'string'},
+                                'headers': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {
+                                        # 'Content-Length': {'type': 'string'},
+                                        'Accept-Encoding': {'type': 'string'},
+                                        'Connection': {'type': 'string'},
+                                        'Accept': {'type': 'string'},
+                                        'User-Agent': {'type': 'string'},
+                                        'Host': {'type': 'string'}}},
+                                'args': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'url': {'type': 'string'}}}}},
+                'parameters': [], 'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -20,7 +90,39 @@ def test_get_params(httpbin):
     response = requests.get(httpbin.url + '/get', params={'query_key': 'query_val'})
     generator.provide_example(response.request, response)
 
-    expected = {u'/get': {'get': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'origin': {'type': 'string'}, u'headers': {'additionalProperties': False, 'type': 'object', 'properties': {u'Content-Length': {'type': 'string'}, u'Accept-Encoding': {'type': 'string'}, u'Connection': {'type': 'string'}, u'Accept': {'type': 'string'}, u'User-Agent': {'type': 'string'}, u'Host': {'type': 'string'}}}, u'args': {'additionalProperties': False, 'type': 'object', 'properties': {u'query_key': {'type': 'string'}}}, u'url': {'type': 'string'}}}}}, 'parameters': [{'required': True, 'type': 'string', 'name': 'query_key', 'in': 'query'}], 'description': 'TODO'}}}
+    expected = {
+        '/get': {
+            'get': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {
+                            'additionalProperties': False,
+                            'type': 'object',
+                            'properties': {
+                                'origin': {'type': 'string'},
+                                'headers': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {
+                                        # 'Content-Length': {'type': 'string'},
+                                        'Accept-Encoding': {'type': 'string'},
+                                        'Connection': {'type': 'string'},
+                                        'Accept': {'type': 'string'},
+                                        'User-Agent': {'type': 'string'},
+                                        'Host': {'type': 'string'}}},
+                                'args': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {
+                                        'query_key': {
+                                            'type': 'string'}}},
+                                'url': {'type': 'string'}}}}
+                },
+                'parameters': [
+                    {'required': True, 'type': 'string', 'name': 'query_key',
+                     'in': 'query'}], 'description': 'TODO'}}
+    }
     assert generator.generate_paths() == expected
 
 
@@ -29,7 +131,60 @@ def test_post_body(httpbin):
     response = requests.post(httpbin.url + '/post', json={'body_key': {'body_subkey': 'body_val'}})
     generator.provide_example(response.request, response)
 
-    expected = {u'/post': {'post': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'files': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'origin': {'type': 'string'}, u'form': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'url': {'type': 'string'}, u'args': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'headers': {'additionalProperties': False, 'type': 'object', 'properties': {u'Content-Length': {'type': 'string'}, u'Accept-Encoding': {'type': 'string'}, u'Connection': {'type': 'string'}, u'Accept': {'type': 'string'}, u'User-Agent': {'type': 'string'}, u'Host': {'type': 'string'}, u'Content-Type': {'type': 'string'}}}, u'json': {'additionalProperties': False, 'type': 'object', 'properties': {u'body_key': {'additionalProperties': False, 'type': 'object', 'properties': {u'body_subkey': {'type': 'string'}}}}}, u'data': {'type': 'string'}}}}}, 'parameters': [{'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'body_key': {'additionalProperties': False, 'type': 'object', 'properties': {u'body_subkey': {'type': 'string'}}}}}, 'name': 'body_data', 'in': 'body'}], 'description': 'TODO'}}}
+    expected = {
+        '/post': {
+            'post': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {
+                            'additionalProperties': False,
+                            'type': 'object',
+                            'properties': {
+                                'files': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'origin': {'type': 'string'},
+                                'form': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'url': {'type': 'string'},
+                                'args': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'headers': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {
+                                        'Content-Length': {'type': 'string'},
+                                        'Accept-Encoding': {'type': 'string'},
+                                        'Connection': {'type': 'string'},
+                                        'Accept': {'type': 'string'},
+                                        'User-Agent': {'type': 'string'},
+                                        'Host': {'type': 'string'},
+                                        'Content-Type': {'type': 'string'}}},
+                                'json': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {
+                                        'body_key': {
+                                            'additionalProperties': False,
+                                            'type': 'object',
+                                            'properties': {
+                                                'body_subkey': {
+                                                    'type': 'string'}}}}
+                                },
+                                'data': {'type': 'string'}}}}},
+                'parameters': [{'schema': {'additionalProperties': False,
+                                           'type': 'object', 'properties': {
+                        'body_key': {'additionalProperties': False,
+                                     'type': 'object', 'properties': {
+                                'body_subkey': {'type': 'string'}}}}},
+                                'name': 'body_data', 'in': 'body'}],
+                'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -41,7 +196,37 @@ def test_naive_path_params(httpbin):
     response = requests.get(httpbin.url + '/cache/2')
     generator.provide_example(response.request, response)
 
-    expected = {u'/cache/{param1}': {'get': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'origin': {'type': 'string'}, u'headers': {'additionalProperties': False, 'type': 'object', 'properties': {u'Content-Length': {'type': 'string'}, u'Accept-Encoding': {'type': 'string'}, u'Connection': {'type': 'string'}, u'Accept': {'type': 'string'}, u'User-Agent': {'type': 'string'}, u'Host': {'type': 'string'}}}, u'args': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'url': {'type': 'string'}}}}}, 'parameters': [{'required': True, 'type': 'string', 'name': 'param1', 'in': 'path'}], 'description': 'TODO'}}}
+    expected = {
+        '/cache/{param1}': {
+            'get': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {
+                            'additionalProperties': False,
+                            'type': 'object',
+                            'properties': {'origin': {
+                                'type': 'string'},
+                                'headers': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {
+                                        'Content-Length': {'type': 'string'},
+                                        'Accept-Encoding': {'type': 'string'},
+                                        'Connection': {'type': 'string'},
+                                        'Accept': {'type': 'string'},
+                                        'User-Agent': {'type': 'string'},
+                                        'Host': {'type': 'string'}}},
+                                'args': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'url': {'type': 'string'}}}
+                    }
+                },
+                'parameters': [{'required': True, 'type': 'string',
+                                'name': 'param1', 'in': 'path'}],
+                'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -53,7 +238,64 @@ def test_component_length_mismatch(httpbin):
     response = requests.get(httpbin.url + '/cache/2')
     generator.provide_example(response.request, response)
 
-    expected = {u'/get': {'get': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'origin': {'type': 'string'}, u'headers': {'additionalProperties': False, 'type': 'object', 'properties': {u'Content-Length': {'type': 'string'}, u'Accept-Encoding': {'type': 'string'}, u'Connection': {'type': 'string'}, u'Accept': {'type': 'string'}, u'User-Agent': {'type': 'string'}, u'Host': {'type': 'string'}}}, u'args': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'url': {'type': 'string'}}}}}, 'parameters': [], 'description': 'TODO'}}, u'/cache/{param1}': {'get': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'origin': {'type': 'string'}, u'headers': {'additionalProperties': False, 'type': 'object', 'properties': {u'Content-Length': {'type': 'string'}, u'Accept-Encoding': {'type': 'string'}, u'Connection': {'type': 'string'}, u'Accept': {'type': 'string'}, u'User-Agent': {'type': 'string'}, u'Host': {'type': 'string'}}}, u'args': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'url': {'type': 'string'}}}}}, 'parameters': [{'required': True, 'type': 'string', 'name': 'param1', 'in': 'path'}], 'description': 'TODO'}}}
+    expected = {
+        '/get': {
+            'get': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {'additionalProperties': False,
+                                   'type': 'object',
+                                   'properties': {'origin': {
+                                       'type': 'string'},
+                                       'headers': {
+                                           'additionalProperties': False,
+                                           'type': 'object',
+                                           'properties': {
+                                               'Content-Length': {'type': 'string'},
+                                               'Accept-Encoding': {'type': 'string'},
+                                               'Connection': {'type': 'string'},
+                                               'Accept': {'type': 'string'},
+                                               'User-Agent': {'type': 'string'},
+                                               'Host': {'type': 'string'}}},
+                                       'args': {
+                                           'additionalProperties': False,
+                                           'type': 'object',
+                                           'properties': {}},
+                                       'url': {
+                                           'type': 'string'}}}}},
+                'parameters': [], 'description': 'TODO'}}, '/cache/{param1}': {
+            'get': {'responses': {'200': {'description': 'TODO',
+                                          'schema': {'additionalProperties': False,
+                                                     'type': 'object',
+                                                     'properties': {'origin': {'type': 'string'},
+                                                                    'headers': {
+                                                                        'additionalProperties': False,
+                                                                        'type': 'object',
+                                                                        'properties': {
+                                                                            'Content-Length': {
+                                                                                'type': 'string'},
+                                                                            'Accept-Encoding': {
+                                                                                'type': 'string'},
+                                                                            'Connection': {
+                                                                                'type': 'string'},
+                                                                            'Accept': {
+                                                                                'type': 'string'},
+                                                                            'User-Agent': {
+                                                                                'type': 'string'},
+                                                                            'Host': {
+                                                                                'type': 'string'}}
+                                                                    },
+                                                                    'args': {
+                                                                        'additionalProperties': False,
+                                                                        'type': 'object',
+                                                                        'properties': {}},
+                                                                    'url': {'type': 'string'}}}}
+                                  },
+                    'parameters': [{
+                        'required': True, 'type': 'string', 'name': 'param1', 'in': 'path'
+                    }],
+                    'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -65,7 +307,22 @@ def test_non_naive_path_params(httpbin):
     response = requests.get(httpbin.url + '/basic-auth/user/pass', auth=('user', 'pass'))
     generator.provide_example(response.request, response)
 
-    expected = {u'/basic-auth/{param1}/pass': {'get': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'authenticated': {'type': 'boolean'}, u'user': {'type': 'string'}}}}}, 'parameters': [{'required': True, 'type': 'string', 'name': 'param1', 'in': 'path'}], 'description': 'TODO'}}}
+    expected = {
+        '/basic-auth/{param1}/pass': {
+            'get': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {
+                            'additionalProperties': False,
+                            'type': 'object',
+                            'properties': {
+                                'authenticated': {'type': 'boolean'},
+                                'user': {'type': 'string'}}}}},
+                'parameters': [
+                    {'required': True, 'type': 'string',
+                     'name': 'param1', 'in': 'path'}],
+                'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -81,7 +338,22 @@ def test_custom_path_params(httpbin):
     response = requests.get(httpbin.url + '/basic-auth/user2/pass', auth=('user2', 'pass'))
     generator.provide_example(response.request, response)
 
-    expected = {u'/basic-auth/{param1}/pass': {'get': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'authenticated': {'type': 'boolean'}, u'user': {'type': 'string'}}}}}, 'parameters': [{'required': True, 'type': 'string', 'name': 'param1', 'in': 'path'}], 'description': 'TODO'}}}
+    expected = {
+        '/basic-auth/{param1}/pass': {
+            'get': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {
+                            'additionalProperties': False,
+                            'type': 'object',
+                            'properties': {
+                                'authenticated': {'type': 'boolean'},
+                                'user': {'type': 'string'}}}}},
+                'parameters': [
+                    {'required': True, 'type': 'string',
+                     'name': 'param1', 'in': 'path'}],
+                'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -93,7 +365,22 @@ def test_base_path(httpbin):
     response = requests.get(httpbin.url + '/cache/2')
     generator.provide_example(response.request, response)
 
-    expected = {'/{param1}': {'get': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'origin': {'type': 'string'}, u'headers': {'additionalProperties': False, 'type': 'object', 'properties': {u'Content-Length': {'type': 'string'}, u'Accept-Encoding': {'type': 'string'}, u'Connection': {'type': 'string'}, u'Accept': {'type': 'string'}, u'User-Agent': {'type': 'string'}, u'Host': {'type': 'string'}}}, u'args': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'url': {'type': 'string'}}}}}, 'parameters': [{'required': True, 'type': 'string', 'name': 'param1', 'in': 'path'}], 'description': 'TODO'}}}
+    expected = {'/{param1}': {'get': {'responses': {'200': {'description': 'TODO', 'schema': {
+        'additionalProperties': False, 'type': 'object',
+        'properties': {'origin': {'type': 'string'},
+                       'headers': {'additionalProperties': False, 'type': 'object',
+                                   'properties': {
+                                       'Content-Length': {'type': 'string'},
+                                                  'Accept-Encoding': {'type': 'string'},
+                                                  'Connection': {'type': 'string'},
+                                                  'Accept': {'type': 'string'},
+                                                  'User-Agent': {'type': 'string'},
+                                                  'Host': {'type': 'string'}}
+                                   },
+                       'args': {'additionalProperties': False, 'type': 'object',
+                                'properties': {}}, 'url': {'type': 'string'}}}}}, 'parameters': [
+        {'required': True, 'type': 'string', 'name': 'param1', 'in': 'path'}],
+                                      'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -102,7 +389,34 @@ def test_param_blacklist(httpbin):
     response = requests.get(httpbin.url + '/get', params={'token': '123'})
     generator.provide_example(response.request, response)
 
-    expected = {u'/get': {'get': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'origin': {'type': 'string'}, u'headers': {'additionalProperties': False, 'type': 'object', 'properties': {u'Content-Length': {'type': 'string'}, u'Accept-Encoding': {'type': 'string'}, u'Connection': {'type': 'string'}, u'Accept': {'type': 'string'}, u'User-Agent': {'type': 'string'}, u'Host': {'type': 'string'}}}, u'args': {'additionalProperties': False, 'type': 'object', 'properties': {u'token': {'type': 'string'}}}, u'url': {'type': 'string'}}}}}, 'parameters': [], 'description': 'TODO'}}}
+    expected = {
+        '/get': {
+            'get': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {'additionalProperties': False,
+                                   'type': 'object',
+                                   'properties': {'origin': {
+                                       'type': 'string'},
+                                       'headers': {
+                                           'additionalProperties': False,
+                                           'type': 'object',
+                                           'properties': {
+                                               'Content-Length': {'type': 'string'},
+                                               'Accept-Encoding': {'type': 'string'},
+                                               'Connection': {'type': 'string'},
+                                               'Accept': {'type': 'string'},
+                                               'User-Agent': {'type': 'string'},
+                                               'Host': {'type': 'string'}}},
+                                       'args': {
+                                           'additionalProperties': False,
+                                           'type': 'object',
+                                           'properties': {'token': {'type': 'string'}}
+                                       },
+                                       'url': {'type': 'string'}}}}
+                },
+                'parameters': [], 'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -124,10 +438,26 @@ def test_definition_matching(httpbin):
     }
 
     generator = Generator(existing_schema=existing_schema)
-    response = requests.post(httpbin.url + '/post', json=[{'name': 'foo', 'id': 1}, {'name': 'bar', 'id': 2}])
+    response = requests.post(httpbin.url + '/post',
+                             json=[{'name': 'foo', 'id': 1}, {'name': 'bar', 'id': 2}])
     generator.provide_example(response.request, response)
 
-    expected = {u'/post': {'post': {'responses': {'200': {'description': 'TODO', 'schema': {'$ref': '#/definitions/Person'}}}, 'parameters': [{'schema': {'items': {'$ref': '#/definitions/Person'}, 'type': 'array'}, 'name': 'body_data', 'in': 'body'}], 'description': 'TODO'}}}
+    expected = {
+        '/post': {
+            'post': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {'$ref': '#/definitions/Person'}}
+                },
+                'parameters': [
+                    {
+                        'schema': {
+                            'items': {
+                                '$ref': '#/definitions/Person'
+                            },
+                            'type': 'array'},
+                        'name': 'body_data', 'in': 'body'}], 'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -162,7 +492,47 @@ def test_subdefinition_matching(httpbin):
     response = requests.post(httpbin.url + '/post', json={'name': {'first': 'foo', 'last': 'bar'}})
     generator.provide_example(response.request, response)
 
-    expected = {u'/post': {'post': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'files': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'origin': {'type': 'string'}, u'form': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'url': {'type': 'string'}, u'args': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'headers': {'additionalProperties': False, 'type': 'object', 'properties': {u'Content-Length': {'type': 'string'}, u'Accept-Encoding': {'type': 'string'}, u'Connection': {'type': 'string'}, u'Accept': {'type': 'string'}, u'User-Agent': {'type': 'string'}, u'Host': {'type': 'string'}, u'Content-Type': {'type': 'string'}}}, u'json': {'$ref': '#/definitions/Person'}, u'data': {'type': 'string'}}}}}, 'parameters': [{'schema': {'$ref': '#/definitions/Person'}, 'name': 'body_data', 'in': 'body'}], 'description': 'TODO'}}}
+    expected = {
+        '/post': {
+            'post': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {'additionalProperties': False,
+                                   'type': 'object',
+                                   'properties': {
+                                       'files': {
+                                           'additionalProperties': False,
+                                           'type': 'object',
+                                           'properties': {}},
+                                       'origin': {'type': 'string'},
+                                       'form': {
+                                           'additionalProperties': False,
+                                           'type': 'object',
+                                           'properties': {}},
+                                       'url': {'type': 'string'},
+                                       'args': {
+                                           'additionalProperties': False,
+                                           'type': 'object',
+                                           'properties': {}},
+                                       'headers': {
+                                           'additionalProperties': False,
+                                           'type': 'object',
+                                           'properties': {
+                                               'Content-Length': {'type': 'string'},
+                                               'Accept-Encoding': {'type': 'string'},
+                                               'Connection': {'type': 'string'},
+                                               'Accept': {'type': 'string'},
+                                               'User-Agent': {'type': 'string'},
+                                               'Host': {'type': 'string'},
+                                               'Content-Type': {'type': 'string'}}},
+                                       'json': {
+                                           '$ref': '#/definitions/Person'},
+                                       'data': {
+                                           'type': 'string'}}}}},
+                'parameters': [{'schema': {'$ref': '#/definitions/Person'},
+                                'name': 'body_data', 'in': 'body'}],
+                'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -174,7 +544,52 @@ def test_empty_array_with_valid_examples(httpbin):
     response = requests.post(httpbin.url + '/post', json=[1, 2, 3])
     generator.provide_example(response.request, response)
 
-    expected = {u'/post': {'post': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'files': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'origin': {'type': 'string'}, u'form': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'url': {'type': 'string'}, u'args': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'headers': {'additionalProperties': False, 'type': 'object', 'properties': {u'Content-Length': {'type': 'string'}, u'Accept-Encoding': {'type': 'string'}, u'Connection': {'type': 'string'}, u'Accept': {'type': 'string'}, u'User-Agent': {'type': 'string'}, u'Host': {'type': 'string'}, u'Content-Type': {'type': 'string'}}}, u'json': {'items': {'type': 'number'}, 'type': 'array'}, u'data': {'type': 'string'}}}}}, 'parameters': [{'schema': {'items': {'type': 'number'}, 'type': 'array'}, 'name': 'body_data', 'in': 'body'}], 'description': 'TODO'}}}
+    expected = {
+        '/post': {
+            'post': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {
+                            'additionalProperties': False,
+                            'type': 'object',
+                            'properties': {
+                                'files': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}
+                                },
+                                'origin': {'type': 'string'},
+                                'form': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'url': {'type': 'string'},
+                                'args': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'headers': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {
+                                        'Content-Length': {'type': 'string'},
+                                        'Accept-Encoding': {'type': 'string'},
+                                        'Connection': {'type': 'string'},
+                                        'Accept': {'type': 'string'},
+                                        'User-Agent': {'type': 'string'},
+                                        'Host': {'type': 'string'},
+                                        'Content-Type': {'type': 'string'}}},
+                                'json': {
+                                    'items': {'type': 'number'},
+                                    'type': 'array'
+                                },
+                                'data': {'type': 'string'}}}}
+                },
+                'parameters': [
+                    {'schema': {'items': {'type': 'number'}, 'type': 'array'},
+                     'name': 'body_data', 'in': 'body'}],
+                'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -183,7 +598,7 @@ def test_empty_array_alone_ignored(httpbin):
     response = requests.post(httpbin.url + '/post', json=[])
     generator.provide_example(response.request, response)
 
-    expected = {u'/post': {'post': {'responses': {}, 'parameters': [], 'description': 'TODO'}}}
+    expected = {'/post': {'post': {'responses': {}, 'parameters': [], 'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -215,7 +630,7 @@ def test_get_yaml(httpbin):
     response = requests.post(httpbin.url + '/post', json=[])
     generator.provide_example(response.request, response)
 
-    expected = {u'/post': {'post': {'responses': {}, 'parameters': [], 'description': 'TODO'}}}
+    expected = {'/post': {'post': {'responses': {}, 'parameters': [], 'description': 'TODO'}}}
     schemas = generator.generate_paths()
     assert schemas == expected
 
@@ -230,11 +645,15 @@ def test_get_yaml(httpbin):
 
 
 def test_provided_default(httpbin):
-    generator = Generator(default={'description': 'unexpected error', 'schema': {'$ref': '#/definitions/Error'}})
+    generator = Generator(
+        default={'description': 'unexpected error', 'schema': {'$ref': '#/definitions/Error'}})
     response = requests.post(httpbin.url + '/get', json=[])
     generator.provide_example(response.request, response)
 
-    expected = {u'/get': {'post': {'responses': {'default': {'description': 'unexpected error', 'schema': {'$ref': '#/definitions/Error'}}}, 'description': 'TODO'}}}
+    expected = {'/get': {'post': {'responses': {
+        'default': {'description': 'unexpected error',
+                    'schema': {'$ref': '#/definitions/Error'}}},
+        'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -243,8 +662,78 @@ def test_optional_field_nonempty_example(httpbin):
     response = requests.post(httpbin.url + '/post', json={'parent': {'other': True}})
     generator.provide_example(response.request, response)
 
-    response = requests.post(httpbin.url + '/post', json={'parent': {'optional': True, 'other': True}})
+    response = requests.post(httpbin.url + '/post',
+                             json={'parent': {'optional': True, 'other': True}})
     generator.provide_example(response.request, response)
 
-    expected = {u'/post': {'post': {'responses': {'200': {'description': 'TODO', 'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'files': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'origin': {'type': 'string'}, u'form': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'url': {'type': 'string'}, u'args': {'additionalProperties': False, 'type': 'object', 'properties': {}}, u'headers': {'additionalProperties': False, 'type': 'object', 'properties': {u'Content-Length': {'type': 'string'}, u'Accept-Encoding': {'type': 'string'}, u'Connection': {'type': 'string'}, u'Accept': {'type': 'string'}, u'User-Agent': {'type': 'string'}, u'Host': {'type': 'string'}, u'Content-Type': {'type': 'string'}}}, u'json': {'additionalProperties': False, 'type': 'object', 'properties': {u'parent': {'additionalProperties': False, 'type': 'object', 'properties': {u'other': {'type': 'boolean'}, u'optional': {'type': 'boolean'}}}}}, u'data': {'type': 'string'}}}}}, 'parameters': [{'schema': {'additionalProperties': False, 'type': 'object', 'properties': {u'parent': {'additionalProperties': False, 'type': 'object', 'properties': {u'other': {'type': 'boolean'}, u'optional': {'type': 'boolean'}}}}}, 'name': 'body_data', 'in': 'body'}], 'description': 'TODO'}}}
+    expected = {
+        '/post': {
+            'post': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {
+                            'additionalProperties': False,
+                            'type': 'object',
+                            'properties': {'files': {
+                                'additionalProperties': False,
+                                'type': 'object',
+                                'properties': {}},
+                                'origin': {
+                                    'type': 'string'},
+                                'form': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'url': {
+                                    'type': 'string'},
+                                'args': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'headers': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {
+                                        'Content-Length': {'type': 'string'},
+                                        'Accept-Encoding': {'type': 'string'},
+                                        'Connection': {'type': 'string'},
+                                        'Accept': {'type': 'string'},
+                                        'User-Agent': {'type': 'string'},
+                                        'Host': {'type': 'string'},
+                                        'Content-Type': {'type': 'string'}}},
+                                'json': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {
+                                        'parent': {
+                                            'additionalProperties': False,
+                                            'type': 'object',
+                                            'properties': {
+                                                'other': {'type': 'boolean'},
+                                                'optional': {'type': 'boolean'}}
+                                        }
+                                    }
+                                },
+                                'data': {
+                                    'type': 'string'}}}}},
+                'parameters': [
+                    {
+                        'schema': {
+                            'additionalProperties': False,
+                            'type': 'object',
+                            'properties': {
+                                'parent': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {
+                                        'other': {'type': 'boolean'},
+                                        'optional': {'type': 'boolean'}}}}
+                        },
+                        'name': 'body_data', 'in': 'body'}],
+                'description': 'TODO'}}}
     assert generator.generate_paths() == expected
+
+
+if __name__ == '__main__':
+    pytest.main()
