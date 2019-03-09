@@ -32,7 +32,7 @@ else:
     raise RuntimeError("Could not find version in '%s'" % VERSIONFILE)
 
 setup(
-    name='swaggergenerator',
+    name='swaggergenerator3',
     version=version,
     description='Automatically generate swagger/OAS schemas from example api interactions.',
     long_description=readme,

@@ -16,7 +16,8 @@ class _Dumper(yaml.SafeDumper):
 
 
 def get_yaml(schema):
-    """Return a string of yaml appropriate to paste under the ``paths:`` key in a swagger schema."""
+    """ Return a string of yaml appropriate to paste under the ``paths:`` key in a swagger
+    schema."""
 
     output = yaml.dump(schema, default_flow_style=False, Dumper=_Dumper,)
 

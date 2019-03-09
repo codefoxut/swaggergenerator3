@@ -1,17 +1,11 @@
-from collections import defaultdict, namedtuple
 import numbers
 import re
+from collections import defaultdict, namedtuple
+from urllib.parse import parse_qsl, urlsplit
 
-import sys
-
-if sys.version_info < (3, 0):
-    from urlparse import parse_qsl, urlsplit
-else:
-    from urllib.parse import parse_qsl, urlsplit
-
-from flex.core import validate
 import flex.exceptions
 import flex.http
+from flex.core import validate
 
 from . import paths
 from .yaml import get_yaml  # noqa
@@ -20,7 +14,8 @@ from .yaml import get_yaml  # noqa
 class EmptyExampleArrayError(ValueError):
     """Raised when an empty array is seen during generation.
 
-    An 'items' key for all arrays is required in OAS, but we can't safely guess the subschema from an empty array.
+    An 'items' key for all arrays is required in OAS, but we can't safely guess the subschema
+    from an empty array.
     """
     pass
 
@@ -34,7 +29,8 @@ class Example(namedtuple('Example', ['request', 'response'])):
     """
 
     def __repr__(self):
-        return "'%s %s -> %s'" % (self.request.method.lower(), self.response.path, self.response.status_code)
+        return "'%s %s -> %s'" % (self.request.method.lower(), self.response.path,
+                                  self.response.status_code)
 
     __str__ = __repr__
 
@@ -72,23 +68,24 @@ class Generator(object):
 
         self.path_to_examples = defaultdict(list)
 
-    def is_param(self, e, path):
-        """Determine if e is a parameter in this path.
+    def is_param(self, ex, path):
+        """Determine if ex is a parameter in this path.
 
         By default, this will match path templates and all-digit strings.
         Override to customize this behavior.
 
         Args:
-            e: the piece of the path in question
+            ex: the piece of the path in question
             path: the entire path
 
         Returns:
-            a truthy value is e is a param, else a falsey value.
+            a truthy value is ex is a param, else a falsey value.
         """
-        return self._param_pattern.match(e) or e.isdigit()
+        return self._param_pattern.match(ex) or ex.isdigit()
 
     def normalize_example(self, example):
-        """Override to perform custom modification to an Example after it's been normalized by flex.
+        """Override to perform custom modification to an Example
+        after it's been normalized by flex.
 
         Mutating ``example`` is permitted (but it should still be returned).
 
@@ -137,16 +134,19 @@ class Generator(object):
         schemas = {path: self._generate_path(path, exs) for (path, exs) in valid_examples.items()}
 
         for path, schema in schemas.items():
-            for example in (ex for ex in valid_examples[path] if ex.response.status_code.startswith('2')):
+            for example in (ex for ex in valid_examples[path]
+                            if ex.response.status_code.startswith('2')):
                 verb = example.request.method.lower()
                 if example.response.status_code in schema[verb]['responses']:
                     response = schema[verb]['responses'][example.response.status_code]
-                    response['schema'] = self._match_references(response['schema'], example.response.data)
+                    response['schema'] = self._match_references(response['schema'],
+                                                                example.response.data)
 
                     matched_params = []
                     for param in schema[verb]['parameters']:
                         if param['in'] == 'body':
-                            param['schema'] = self._match_references(param['schema'], example.request.data)
+                            param['schema'] = self._match_references(param['schema'],
+                                                                     example.request.data)
                         matched_params.append(param)
                     schema[verb]['parameters'] = matched_params
 

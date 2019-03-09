@@ -1,9 +1,7 @@
+import pytest
 import requests
 
 from swaggergenerator3 import Generator, get_yaml
-
-import pytest
-import dictdiffer
 
 
 def test_no_params(httpbin):
@@ -211,7 +209,7 @@ def test_naive_path_params(httpbin):
                                     'additionalProperties': False,
                                     'type': 'object',
                                     'properties': {
-                                        'Content-Length': {'type': 'string'},
+                                        # 'Content-Length': {'type': 'string'},
                                         'Accept-Encoding': {'type': 'string'},
                                         'Connection': {'type': 'string'},
                                         'Accept': {'type': 'string'},
@@ -244,15 +242,16 @@ def test_component_length_mismatch(httpbin):
                 'responses': {
                     '200': {
                         'description': 'TODO',
-                        'schema': {'additionalProperties': False,
+                        'schema': {
+                            'additionalProperties': False,
                                    'type': 'object',
-                                   'properties': {'origin': {
-                                       'type': 'string'},
+                                   'properties': {
+                                       'origin': {'type': 'string'},
                                        'headers': {
                                            'additionalProperties': False,
                                            'type': 'object',
                                            'properties': {
-                                               'Content-Length': {'type': 'string'},
+                                               # 'Content-Length': {'type': 'string'},
                                                'Accept-Encoding': {'type': 'string'},
                                                'Connection': {'type': 'string'},
                                                'Accept': {'type': 'string'},
@@ -263,39 +262,43 @@ def test_component_length_mismatch(httpbin):
                                            'type': 'object',
                                            'properties': {}},
                                        'url': {
-                                           'type': 'string'}}}}},
-                'parameters': [], 'description': 'TODO'}}, '/cache/{param1}': {
-            'get': {'responses': {'200': {'description': 'TODO',
-                                          'schema': {'additionalProperties': False,
-                                                     'type': 'object',
-                                                     'properties': {'origin': {'type': 'string'},
-                                                                    'headers': {
-                                                                        'additionalProperties': False,
-                                                                        'type': 'object',
-                                                                        'properties': {
-                                                                            'Content-Length': {
-                                                                                'type': 'string'},
-                                                                            'Accept-Encoding': {
-                                                                                'type': 'string'},
-                                                                            'Connection': {
-                                                                                'type': 'string'},
-                                                                            'Accept': {
-                                                                                'type': 'string'},
-                                                                            'User-Agent': {
-                                                                                'type': 'string'},
-                                                                            'Host': {
-                                                                                'type': 'string'}}
-                                                                    },
-                                                                    'args': {
-                                                                        'additionalProperties': False,
-                                                                        'type': 'object',
-                                                                        'properties': {}},
-                                                                    'url': {'type': 'string'}}}}
-                                  },
-                    'parameters': [{
-                        'required': True, 'type': 'string', 'name': 'param1', 'in': 'path'
-                    }],
-                    'description': 'TODO'}}}
+                                           'type': 'string'}}}}
+                },
+                'parameters': [],
+                'description': 'TODO'}
+        },
+        '/cache/{param1}': {
+            'get': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {
+                            'additionalProperties': False,
+                            'type': 'object',
+                            'properties': {
+                                'origin': {'type': 'string'},
+                                'headers': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {
+                                        # 'Content-Length': {'type': 'string'},
+                                        'Accept-Encoding': {'type': 'string'},
+                                        'Connection': {'type': 'string'},
+                                        'Accept': {'type': 'string'},
+                                        'User-Agent': {'type': 'string'},
+                                        'Host': {'type': 'string'}}
+                                },
+                                'args': {
+                                    'additionalProperties': False,
+                                    'type': 'object',
+                                    'properties': {}},
+                                'url': {'type': 'string'}}}
+                    }
+                },
+                'parameters': [{
+                    'required': True, 'type': 'string', 'name': 'param1', 'in': 'path'
+                }],
+                'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -365,22 +368,36 @@ def test_base_path(httpbin):
     response = requests.get(httpbin.url + '/cache/2')
     generator.provide_example(response.request, response)
 
-    expected = {'/{param1}': {'get': {'responses': {'200': {'description': 'TODO', 'schema': {
-        'additionalProperties': False, 'type': 'object',
-        'properties': {'origin': {'type': 'string'},
-                       'headers': {'additionalProperties': False, 'type': 'object',
-                                   'properties': {
-                                       'Content-Length': {'type': 'string'},
-                                                  'Accept-Encoding': {'type': 'string'},
-                                                  'Connection': {'type': 'string'},
-                                                  'Accept': {'type': 'string'},
-                                                  'User-Agent': {'type': 'string'},
-                                                  'Host': {'type': 'string'}}
-                                   },
-                       'args': {'additionalProperties': False, 'type': 'object',
-                                'properties': {}}, 'url': {'type': 'string'}}}}}, 'parameters': [
-        {'required': True, 'type': 'string', 'name': 'param1', 'in': 'path'}],
-                                      'description': 'TODO'}}}
+    expected = {
+        '/{param1}': {
+            'get': {
+                'responses': {
+                    '200': {
+                        'description': 'TODO',
+                        'schema': {
+                            'additionalProperties': False, 'type': 'object',
+                            'properties': {
+                                'origin': {'type': 'string'},
+                                'headers': {
+                                    'additionalProperties': False, 'type': 'object',
+                                    'properties': {
+                                        # 'Content-Length': {'type': 'string'},
+                                        'Accept-Encoding': {'type': 'string'},
+                                        'Connection': {'type': 'string'},
+                                        'Accept': {'type': 'string'},
+                                        'User-Agent': {'type': 'string'},
+                                        'Host': {'type': 'string'}}
+                                },
+                                'args': {
+                                    'additionalProperties': False, 'type': 'object',
+                                    'properties': {}}, 'url': {'type': 'string'}
+                            }}}
+                },
+                'parameters': [
+                    {
+                        'required': True, 'type': 'string', 'name': 'param1',
+                        'in': 'path'}],
+                'description': 'TODO'}}}
     assert generator.generate_paths() == expected
 
 
@@ -403,7 +420,7 @@ def test_param_blacklist(httpbin):
                                            'additionalProperties': False,
                                            'type': 'object',
                                            'properties': {
-                                               'Content-Length': {'type': 'string'},
+                                               # 'Content-Length': {'type': 'string'},
                                                'Accept-Encoding': {'type': 'string'},
                                                'Connection': {'type': 'string'},
                                                'Accept': {'type': 'string'},
