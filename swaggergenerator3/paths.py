@@ -1,3 +1,6 @@
+import collections
+
+
 def build_paramaterized_path(components):
     i = 0
     path = []
@@ -19,3 +22,13 @@ def component_matches(c1, c2):
             return False
 
     return True
+
+
+def update_dict(d, u):
+    for k, v in u.items():
+        if isinstance(v, collections.Mapping):
+            d[k] = update_dict(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d
+

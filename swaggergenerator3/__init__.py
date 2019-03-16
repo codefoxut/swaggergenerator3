@@ -6,6 +6,7 @@ from urllib.parse import parse_qsl, urlsplit
 import flex.exceptions
 import flex.http
 from flex.core import validate
+import collections
 
 from . import paths
 from .yaml import get_yaml  # noqa
@@ -20,12 +21,13 @@ class EmptyExampleArrayError(ValueError):
     pass
 
 
-class Example(namedtuple('Example', ['request', 'response'])):
+class Example(namedtuple('Example', ['request', 'response', 'description'])):
     """A sample api interaction.
 
     Attributes:
         request: a flex.http.Request
         response: a flex.http.Response
+        description: python description.
     """
 
     def __repr__(self):
@@ -95,7 +97,7 @@ class Generator(object):
 
         return example
 
-    def provide_example(self, request, response):
+    def provide_example(self, request, response, description=''):
         """Store an example interaction to use later in generation.
 
         If ``existing_schema`` was provided and the interaction matches an existing path/verb pair,
@@ -106,12 +108,13 @@ class Generator(object):
         <http://flex-swagger.readthedocs.org/en/latest/#api-call-validation>`__.
 
         Args:
-            request: an request object recognized by flex
+            request: a request object recognized by flex
             response: a response object recognized by flex
+            description: a string for function mentioned.
         """
         flex_response = flex.http.normalize_response(response, request)
 
-        example = Example(flex_response.request, flex_response)
+        example = Example(flex_response.request, flex_response, description)
         example = self.normalize_example(example)
 
         if not self.existing_schema or not self._known_to_schema(example):
@@ -122,11 +125,11 @@ class Generator(object):
         any previously-provided examples.
 
         Returns:
-            a dictionary mapping templated paths to dictionaries representing
+            a dictionary mapping template paths to dictionaries representing
             `Path Item Objects <http://swagger.io/specification/#pathItemObject>`__.
 
         To output yaml for pasting into an existing schema, call
-        :func:`get_yaml <swaggergenerator.get_yaml>` on the result.
+        :func:`get_yaml <swaggergenerator3.get_yaml>` on the result.
         """
 
         valid_examples = self._merge_examples(self.path_to_examples)
@@ -134,8 +137,8 @@ class Generator(object):
         schemas = {path: self._generate_path(path, exs) for (path, exs) in valid_examples.items()}
 
         for path, schema in schemas.items():
-            for example in (ex for ex in valid_examples[path]
-                            if ex.response.status_code.startswith('2')):
+            for example in (ex for ex in valid_examples[path] ):
+                            # if ex.response.status_code.startswith('2')):
                 verb = example.request.method.lower()
                 if example.response.status_code in schema[verb]['responses']:
                     response = schema[verb]['responses'][example.response.status_code]
@@ -166,7 +169,7 @@ class Generator(object):
 
     def _merge_examples(self, path_to_examples):
         # return a copy of path_to_examples, but with paths that are likely the same
-        # (just with different url params) merged into one paramaterized path
+        # (just with different url params) merged into one parameterized path
 
         # Merging urls is currently a two-step process.
         # First, we detect "naive" params: those that is_param returns true for.
@@ -204,8 +207,10 @@ class Generator(object):
                 my_examples = component_examples.pop(c1)
                 component_examples[match].extend(my_examples)
 
-        return {paths.build_paramaterized_path(components): exs
-                for (components, exs) in component_examples.items()}
+        return {
+            paths.build_paramaterized_path(components): exs
+            for (components, exs) in component_examples.items()
+        }
 
     def _get_components(self, path):
         components = tuple(
@@ -228,19 +233,21 @@ class Generator(object):
 
         for ex in examples:
             verb = ex.request.method.lower()
-            if ex.response.status_code.startswith('2'):
+            schema[verb]['description'] = ex.description or 'TODO'
+            if ex.response.content_type == 'application/json':
                 try:
-                    schema[verb]['responses'][ex.response.status_code] = {
-                        'schema': self._generate_schema(ex.response.data),
-                        'description': 'TODO'
-                    }
+                    schema[verb]['responses'][ex.response.status_code] = \
+                        self._generate_response_params(
+                            ex.response.data,
+                            schema[verb]['responses'].get(ex.response.status_code, {}))
                 except EmptyExampleArrayError:
                     pass
 
                 # TODO this can leave out path params. probably in the case
                 # where the example is a non-naive param, since we call get_components
                 # and maybe the path hasn't been replaced with a templated one?
-                schema[verb]['parameters'] = self._generate_request_params(path, ex.request)
+                schema[verb]['parameters'] = self._generate_request_params(
+                    path, ex.request, schema[verb].get('parameters', []))
 
             if self.default is not None:
                 schema[verb]['responses']['default'] = self.default
@@ -248,7 +255,16 @@ class Generator(object):
         # pyyaml cannot accept defaultdicts.
         return dict(schema)
 
-    def _generate_request_params(self, path, request):
+    def _generate_response_params(self, response, params=None):
+        ret = {
+            'schema': self._generate_schema(response),
+            'description': 'TODO'
+        }
+        if params:
+            ret['schema'] = self._merge_response_schema(ret['schema'], params['schema'])
+        return ret
+
+    def _generate_request_params(self, path, request, params=None):
         parameters = []
 
         # TODO we could also detect other param types easily. currently we just do strings.
@@ -268,13 +284,13 @@ class Generator(object):
         for c in self._get_components(path):
             if c is None:
                 i += 1
-                query_param = {
+                path_param = {
                     'name': "param%s" % i,
                     'in': 'path',
                     'required': True,
                     'type': 'string',
                 }
-                parameters.append(query_param)
+                parameters.append(path_param)
 
         if request.data:
             body_param = {
@@ -283,8 +299,27 @@ class Generator(object):
                 'schema': self._generate_schema(request.data),
             }
             parameters.append(body_param)
-
+        if params:
+            parameters = self._merge_query_params(parameters, params)
         return parameters
+
+    @staticmethod
+    def _merge_query_params(params1, params2):
+        # create dict of query_params2
+        query_params2 = {
+            param['name']: param for param in params2 if param['in'] == 'query'}
+
+        for param in params1:
+            if param['in'] == 'query':
+                if param['name'] in query_params2:
+                    query_params2.pop(param['name'])
+                else:
+                    param['required'] = False
+        for name, param in query_params2.items():
+            param['required'] = False
+            params1.append(param)
+
+        return params1
 
     @staticmethod
     def _get_swagger_type(x):
@@ -327,6 +362,10 @@ class Generator(object):
             schema['items'] = self._generate_schema(body[0])
 
         return schema
+
+    def _merge_response_schema(self, schema1, schema2):
+        schema1 = paths.update_dict(schema1, schema2)
+        return schema1
 
     def _match_references(self, schema, body):
         if '$ref' in schema:
