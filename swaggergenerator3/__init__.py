@@ -1,7 +1,10 @@
 import numbers
 import re
 from collections import defaultdict, namedtuple
-from urllib.parse import parse_qsl, urlsplit
+from urllib.parse import parse_qsl
+
+import ast
+import json
 
 import flex.exceptions
 import flex.http
@@ -264,17 +267,32 @@ class Generator(object):
             ret['schema'] = self._merge_response_schema(ret['schema'], params['schema'])
         return ret
 
+    def _get_request_query_params_with_data_type(self, query_items):
+        """Determine data type for request query params."""
+        new_query_dict = {}
+        for k, v in query_items:
+            try:
+                v = ast.literal_eval(v)
+            except Exception:
+                try:
+                    v = json.loads(v)
+                except Exception:
+                    pass
+            new_query_dict[k] = v
+        return new_query_dict
+
     def _generate_request_params(self, path, request, params=None):
         parameters = []
 
         # TODO we could also detect other param types easily. currently we just do strings.
-
-        for q_k, q_v in parse_qsl(urlsplit(request.url).query):
+        query_dict = parse_qsl(request.query)
+        modified_req_params = self._get_request_query_params_with_data_type(query_dict)
+        for q_k, q_v in modified_req_params.items():
             query_param = {
                 'name': q_k,
                 'in': 'query',
                 'required': True,
-                'type': 'string',
+                'type': self._generate_type_params(q_v),
             }
 
             if q_k not in self.query_key_blacklist:
@@ -341,6 +359,24 @@ class Generator(object):
             _type = 'string'
 
         return _type
+
+    def _generate_type_params(self, body):
+        _type = self._get_swagger_type(body)
+        schema = {}
+        if _type == 'object':
+            properties = {key: self._generate_type_params(val)
+                          for key, val in body.items()}
+            schema['properties'] = properties
+        elif _type == 'array':
+            if len(body) == 0:
+                raise EmptyExampleArrayError
+
+            # note that this will cause problems with non-homogeneous arrays
+            schema['items'] = self._generate_type_params(body[0])
+        else:
+            schema = _type
+
+        return schema
 
     def _generate_schema(self, body):
         _type = self._get_swagger_type(body)
