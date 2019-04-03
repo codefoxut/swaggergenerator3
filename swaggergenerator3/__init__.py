@@ -293,7 +293,7 @@ class Generator(object):
                 'in': 'query',
                 'required': True,
             }
-            schema_type =  self._generate_type_params(q_v)
+            schema_type = self._generate_type_params(q_v)
 
             query_param.update(schema_type)
 
@@ -364,9 +364,10 @@ class Generator(object):
 
     def _generate_type_params(self, body):
         _type = self._get_swagger_type(body)
-        schema = {}
+        schema = {"type": _type}
         if _type == 'object':
-            properties = {key: self._generate_type_params(val)
+            properties = {
+                key: self._generate_type_params(val)
                           for key, val in body.items()}
             schema['properties'] = properties
         elif _type == 'array':
