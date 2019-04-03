@@ -24,13 +24,14 @@ class EmptyExampleArrayError(ValueError):
     pass
 
 
-class Example(namedtuple('Example', ['request', 'response', 'description'])):
+class Example(namedtuple('Example', ['request', 'response', 'description', 'summary'])):
     """A sample api interaction.
 
     Attributes:
         request: a flex.http.Request
         response: a flex.http.Response
         description: python description.
+        summary: name of the docs.
     """
 
     def __repr__(self):
@@ -100,7 +101,7 @@ class Generator(object):
 
         return example
 
-    def provide_example(self, request, response, description=''):
+    def provide_example(self, request, response, description='', summary=''):
         """Store an example interaction to use later in generation.
 
         If ``existing_schema`` was provided and the interaction matches an existing path/verb pair,
@@ -117,7 +118,7 @@ class Generator(object):
         """
         flex_response = flex.http.normalize_response(response, request)
 
-        example = Example(flex_response.request, flex_response, description)
+        example = Example(flex_response.request, flex_response, description, summary)
         example = self.normalize_example(example)
 
         if not self.existing_schema or not self._known_to_schema(example):
@@ -237,6 +238,7 @@ class Generator(object):
         for ex in examples:
             verb = ex.request.method.lower()
             schema[verb]['description'] = ex.description or 'TODO'
+            schema[verb]['summary'] = ex.summary or ''
             if ex.response.content_type == 'application/json':
                 try:
                     schema[verb]['responses'][ex.response.status_code] = \

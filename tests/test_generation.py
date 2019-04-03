@@ -733,7 +733,8 @@ def test_optional_field_nonempty_example(httpbin):
                                     }
                                 },
                                 'data': {
-                                    'type': 'string'}}}}},
+                                    'type': 'string'
+                                }}}}},
                 'parameters': [
                     {
                         'schema': {

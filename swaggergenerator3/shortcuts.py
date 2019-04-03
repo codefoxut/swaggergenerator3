@@ -14,10 +14,7 @@ from pprint import pprint
 import requests
 import yaml
 
-try:
-    from swaggergenerator3 import Generator, get_yaml
-except ImportError:
-    pass
+from . import Generator, get_yaml
 
 
 class SwaggerDocsGen:
@@ -67,14 +64,16 @@ class SwaggerDocsGen:
 
         return yml_data
 
-    def add_endpoint_to_generator(self, url, method, params, headers=None, description=''):
+    def add_endpoint_to_generator(self, url, method, params, headers=None, description='',
+                                  summary=''):
         # access the url for this source.
         if method == 'GET':
             response = requests.request(method, url, params=params, headers=headers)
         else:
             response = requests.request(method, url, data=params, headers=headers)
         # print("response", response.json())
-        self.generator.provide_example(response.request, response, description=description)
+        self.generator.provide_example(response.request, response, description=description,
+                                       summary=summary)
 
     def generate_docs(self, api_docs_list, filename=None):
         """Generate docs by iterating over the api_doc_list and store the generated doc in
@@ -96,7 +95,7 @@ class SwaggerDocsGen:
         for api_doc in api_docs_list:
             self.add_endpoint_to_generator(
                 api_doc['url'], api_doc['method'], api_doc.get('params'),
-                api_doc.get('headers'), api_doc.get('description'))
+                api_doc.get('headers'), api_doc.get('description'), api_doc.get('summary'))
 
         self.generate_files(filename)
 
