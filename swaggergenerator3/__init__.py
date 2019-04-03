@@ -292,8 +292,10 @@ class Generator(object):
                 'name': q_k,
                 'in': 'query',
                 'required': True,
-                'type': self._generate_type_params(q_v),
             }
+            schema_type =  self._generate_type_params(q_v)
+
+            query_param.update(schema_type)
 
             if q_k not in self.query_key_blacklist:
                 parameters.append(query_param)
@@ -373,8 +375,6 @@ class Generator(object):
 
             # note that this will cause problems with non-homogeneous arrays
             schema['items'] = self._generate_type_params(body[0])
-        else:
-            schema = _type
 
         return schema
 
